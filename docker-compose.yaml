@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  core-service:
+    image: core-service:0.0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - core-service-db
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://core-service-db/core-service-db
+      - SPRING_DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+
+  core-service-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
+      POSTGRES_DB: core-service-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - core-service-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  core-service-db-data:

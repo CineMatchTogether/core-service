@@ -23,3 +23,11 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+property:
+  app:
+    jwtCookieName: app-jwt
+    jwtRefreshCookieName: app-jwt-refresh
+    jwtSecret: ==========secret=phrase=string=example=============
+    jwtExpirationMs: 3600000
+    jwtRefreshExpirationMs: 18000000

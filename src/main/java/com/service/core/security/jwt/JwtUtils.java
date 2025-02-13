@@ -1,6 +1,8 @@
 package com.service.core.security.jwt;
 
+import com.service.core.models.entities.Role;
 import com.service.core.models.entities.User;
+import com.service.core.models.entities.enums.ERole;
 import com.service.core.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -17,6 +19,9 @@ import org.springframework.web.util.WebUtils;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -36,12 +41,18 @@ public class JwtUtils {
     private String jwtRefreshCookie;
 
     public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
-        String jwt = generateTokenFromUsername(userPrincipal.getUsername());
+        Map<String, String> payload = new HashMap<>();
+        payload.put("username", userPrincipal.getUsername());
+        payload.put("roles", userPrincipal.getAuthorities().toString());
+        String jwt = generateTokenFromPayload(payload);
         return generateCookie(jwtCookie, jwt, "/api");
     }
 
     public ResponseCookie generateJwtCookie(User user) {
-        String jwt = generateTokenFromUsername(user.getUsername());
+        Map<String, String> payload = new HashMap<>();
+        payload.put("username", user.getUsername());
+        payload.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()).toString());
+        String jwt = generateTokenFromPayload(payload);
         return generateCookie(jwtCookie, jwt, "/api");
     }
 
@@ -67,7 +78,7 @@ public class JwtUtils {
 
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+                .parseClaimsJws(token).getBody().get("username", String.class);
     }
 
     private Key key() {
@@ -91,9 +102,9 @@ public class JwtUtils {
         return false;
     }
 
-    public String generateTokenFromUsername(String username) {
+    public String generateTokenFromPayload(Map<String, ?> payload) {
         return Jwts.builder()
-                .setSubject(username)
+                .setClaims(payload)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)

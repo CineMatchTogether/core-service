@@ -5,8 +5,8 @@ import com.service.core.models.entities.Role;
 import com.service.core.models.entities.User;
 import com.service.core.models.entities.enums.ERole;
 import com.service.core.repositories.RoleRepository;
-import com.service.core.security.payload.LoginRequest;
-import com.service.core.security.payload.SignupRequest;
+import com.service.core.security.requests.LoginRequest;
+import com.service.core.security.requests.SignupRequest;
 import com.service.core.security.services.exception.EmptyTokenRefreshException;
 import com.service.core.security.services.exception.TokenRefreshException;
 import com.service.core.services.UserService;
@@ -59,6 +59,7 @@ public class AuthService {
 
         User user = User.builder()
                 .username(signUpRequest.username())
+                .email(signUpRequest.email())
                 .password(encoder.encode(signUpRequest.password()))
                 .build();
 
@@ -72,7 +73,7 @@ public class AuthService {
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin":
+                    case "ROLE_ADMIN":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);

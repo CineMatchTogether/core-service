@@ -5,8 +5,8 @@ import com.service.core.models.dto.UserDto;
 import com.service.core.models.entities.RefreshToken;
 import com.service.core.models.entities.User;
 import com.service.core.security.jwt.JwtUtils;
-import com.service.core.security.payload.LoginRequest;
-import com.service.core.security.payload.SignupRequest;
+import com.service.core.security.requests.LoginRequest;
+import com.service.core.security.requests.SignupRequest;
 import com.service.core.security.services.AuthService;
 import com.service.core.security.services.RefreshTokenService;
 import com.service.core.security.services.UserDetailsImpl;
@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Validated
 public class AuthController {
     private final JwtUtils jwtUtils;
 

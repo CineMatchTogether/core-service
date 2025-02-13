@@ -1,4 +1,4 @@
-package com.service.core.security.payload;
+package com.service.core.security.requests;
 
 import jakarta.validation.constraints.NotBlank;
 

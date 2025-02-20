@@ -1,10 +1,12 @@
 spring:
+  config:
+    import: optional:file:.env.properties
   application:
     name: core-service
   datasource:
     url: jdbc:postgresql://localhost:5432/mydatabase
-    username: postgres
-    password: postgres
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -28,6 +30,6 @@ property:
   app:
     jwtCookieName: app-jwt
     jwtRefreshCookieName: app-jwt-refresh
-    jwtSecret: ==========secret=phrase=string=example=============
+    jwtSecret: ${JWT_SECRET:==========secret=phrase=string=example=============}
     jwtExpirationMs: 3600000
     jwtRefreshExpirationMs: 18000000

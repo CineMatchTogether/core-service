@@ -2,8 +2,10 @@ package com.service.core.security;
 
 import com.service.core.security.jwt.AuthEntryPointJwt;
 import com.service.core.security.jwt.AuthTokenFilter;
+import com.service.core.security.services.CustomAuthenticationSuccessHandler;
 import com.service.core.security.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +18,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -25,17 +32,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig {
 
+    @Value("${property.app.baseUrl}")
+    private String baseUrl;
+
+    @Value("${property.app.yandexClientId}")
+    private String yandexClientId;
+
+    @Value("${property.app.yandexClientSecret}")
+    private String yandexClientSecret;
+
+    @Value("${server.port}")
+    private String basePort;
+
     private static final String[] AUTH_WHITELIST = {
             "/api/auth/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html",
+            "/swagger-ui.html"
     };
 
+    private final CustomAuthenticationSuccessHandler successHandler;
     private final UserDetailsServiceImpl userDetailsService;
-
     private final AuthEntryPointJwt unauthorizedHandler;
-
     private final AuthTokenFilter authTokenFilter;
 
     @Bean
@@ -66,12 +84,33 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(AUTH_WHITELIST).permitAll()
                                 .anyRequest().authenticated()
-                );
+                )
+                .oauth2Login(config -> config.successHandler(successHandler::oauthSuccessResponse));;
 
         http.authenticationProvider(authenticationProvider());
 
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository() {
+        return new InMemoryClientRegistrationRepository(this.yandexClientRegistration());
+    }
+    private ClientRegistration yandexClientRegistration() {
+        return ClientRegistration.withRegistrationId("yandex")
+                .clientId(yandexClientId)
+                .clientSecret(yandexClientSecret)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri(baseUrl+ ":" + basePort + "/login/oauth2/code/yandex")
+                .scope("login:info", "login:email")
+                .authorizationUri("https://oauth.yandex.com/authorize")
+                .tokenUri("https://oauth.yandex.com/token")
+                .userInfoUri("https://login.yandex.ru/info")
+                .userNameAttributeName("id")
+                .clientName("Yandex")
+                .build();
     }
 }

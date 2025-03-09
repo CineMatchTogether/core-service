@@ -2,7 +2,6 @@ package com.service.core.security.jwt;
 
 import com.service.core.models.entities.Role;
 import com.service.core.models.entities.User;
-import com.service.core.models.entities.enums.ERole;
 import com.service.core.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;

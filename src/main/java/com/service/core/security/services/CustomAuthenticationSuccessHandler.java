@@ -8,8 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -25,24 +23,17 @@ public class CustomAuthenticationSuccessHandler {
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
 
-    @Value("${property.app.baseUrl}")
-    private String baseUrl;
-
-    @Value("${property.app.staticPort}")
-    private String staticPort;
-    private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationSuccessHandler.class);
-
+    @Value("${property.app.staticUrl}")
+    private String staticUrl;
 
     @SneakyThrows
     public void oauthSuccessResponse(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        logger.info(response.toString());
         DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
-        logger.info(principal.toString());
         String username = principal.getAttribute("login");
         String email = principal.getAttribute("email");
 
         //find or create user
-        User user = userService.creatOrGetOauthUser(username, email);
+        User user = userService.creatOrGetOauthUser(username, email, principal);
         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
 
         //generate tokens
@@ -52,13 +43,11 @@ public class CustomAuthenticationSuccessHandler {
 
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString());
-        logger.info(jwtCookie.toString());
-        logger.info(jwtRefreshCookie.toString());
 
         //remove session
         request.getSession().invalidate();
 
         //redirect to frontend
-        response.sendRedirect(baseUrl + ":" + staticPort);
+        response.sendRedirect(staticUrl);
     }
 }

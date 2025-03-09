@@ -1,6 +1,8 @@
 services:
   core-service:
     image: core-service:0.0.1
+    env_file:
+      - .env.properties
     build:
       context: .
       dockerfile: Dockerfile

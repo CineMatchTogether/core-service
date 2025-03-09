@@ -28,8 +28,7 @@ springdoc:
 
 property:
   app:
-    baseUrl: ${BASE_URL:http://localhost}
-    staticPort: ${STATIC_PORT:8080}
+    staticUrl: ${STATIC_URL:http://localhost:8080}
     yandexClientId: ${YANDEX_CLIENT_ID}
     yandexClientSecret: ${YANDEX_CLIENT_SECRET}
     jwtCookieName: app-jwt

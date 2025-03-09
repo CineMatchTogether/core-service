@@ -6,6 +6,7 @@ import com.service.core.security.services.CustomAuthenticationSuccessHandler;
 import com.service.core.security.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,17 +33,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    @Value("${property.app.baseUrl}")
-    private String baseUrl;
-
     @Value("${property.app.yandexClientId}")
     private String yandexClientId;
 
     @Value("${property.app.yandexClientSecret}")
     private String yandexClientSecret;
-
-    @Value("${server.port}")
-    private String basePort;
 
     private static final String[] AUTH_WHITELIST = {
             "/api/auth/**",
@@ -51,6 +46,7 @@ public class WebSecurityConfig {
             "/swagger-ui.html"
     };
 
+    private final ServerProperties serverProperties;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
@@ -85,7 +81,9 @@ public class WebSecurityConfig {
                         auth.requestMatchers(AUTH_WHITELIST).permitAll()
                                 .anyRequest().authenticated()
                 )
-                .oauth2Login(config -> config.successHandler(successHandler::oauthSuccessResponse));;
+                .oauth2Login(config -> config
+                        .successHandler(successHandler::oauthSuccessResponse)
+                        .loginPage("/oauth2/authorization/yandex"));
 
         http.authenticationProvider(authenticationProvider());
 
@@ -98,13 +96,14 @@ public class WebSecurityConfig {
     public ClientRegistrationRepository clientRegistrationRepository() {
         return new InMemoryClientRegistrationRepository(this.yandexClientRegistration());
     }
+
     private ClientRegistration yandexClientRegistration() {
         return ClientRegistration.withRegistrationId("yandex")
                 .clientId(yandexClientId)
                 .clientSecret(yandexClientSecret)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri(baseUrl+ ":" + basePort + "/login/oauth2/code/yandex")
+                .redirectUri(getBaseUrl(serverProperties) + "/login/oauth2/code/yandex")
                 .scope("login:info", "login:email")
                 .authorizationUri("https://oauth.yandex.com/authorize")
                 .tokenUri("https://oauth.yandex.com/token")
@@ -112,5 +111,16 @@ public class WebSecurityConfig {
                 .userNameAttributeName("id")
                 .clientName("Yandex")
                 .build();
+    }
+
+    public String getBaseUrl(ServerProperties serverProperties) {
+        String scheme = serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled() ? "https" : "http";
+        String host = "localhost";
+        int port = serverProperties.getPort() != null ? serverProperties.getPort() : 8080;
+        String contextPath = serverProperties.getServlet().getContextPath() != null
+                ? serverProperties.getServlet().getContextPath()
+                : "";
+
+        return scheme + "://" + host + ":" + port + contextPath;
     }
 }

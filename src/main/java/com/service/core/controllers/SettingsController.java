@@ -1,0 +1,25 @@
+package com.service.core.controllers;
+
+import com.service.core.mappers.SettingMapper;
+import com.service.core.models.dto.SettingDto;
+import com.service.core.services.SettingService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class SettingsController {
+
+    private final SettingMapper settingMapper;
+    private final SettingService settingService;
+
+    @PostMapping("/set-settings")
+    public ResponseEntity<SettingDto> setSettings(@RequestBody SettingDto dto) {
+        return ResponseEntity.ok(settingMapper.toDto(settingService.create(settingMapper.toModel(dto))));
+    }
+}

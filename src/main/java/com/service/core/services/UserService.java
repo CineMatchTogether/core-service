@@ -20,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final KinoPoiskService kinoPoiskService;
 
     public User createUser(User user) throws UserAlreadyExistException {
         if (userRepository.existsByUsername(user.getUsername())) {
@@ -45,6 +46,7 @@ public class UserService {
                 .realName(principal.getAttribute("real_name"))
                 .login(principal.getAttribute("login"))
                 .email(principal.getAttribute("default_email"))
+                .kinopoiskId(kinoPoiskService.getKinoPoiskId(principal.getAttribute("login")))
                 .build();
 
         User user = User.builder()

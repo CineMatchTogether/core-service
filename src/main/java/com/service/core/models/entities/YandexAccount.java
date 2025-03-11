@@ -22,6 +22,9 @@ public class YandexAccount {
     @Column(name = "yandex_id")
     private Long yandexId;
 
+    @Column(name = "kinopoisk_id")
+    private Long kinopoiskId;
+
     private String login;
 
     private String email;

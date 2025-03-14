@@ -2,6 +2,7 @@ package com.service.core.services;
 
 import com.service.core.models.entities.Setting;
 import com.service.core.repositories.SettingsRepository;
+import com.service.core.services.exceptions.SettingsNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class SettingService {
     }
 
     public Setting getSetting() {
-        return settingsRepository.findById(1L).orElseThrow();
+        return settingsRepository.findById(1L).orElseThrow(SettingsNotFoundException::new);
     }
 
 }

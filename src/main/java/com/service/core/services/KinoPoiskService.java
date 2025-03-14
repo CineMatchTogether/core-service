@@ -3,6 +3,7 @@ package com.service.core.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.service.core.models.entities.Setting;
+import com.service.core.services.exceptions.KinoPoiskIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ public class KinoPoiskService {
     private final RestTemplate restTemplate;
     private final SettingService settingService;
 
-    public Long getKinoPoiskId(String login) {
+    public Long getKinoPoiskId(String login) throws Exception {
         Setting setting = settingService.getSetting();
         String token = setting.getSearchToken();
         String cookie = setting.getCookie();
@@ -32,20 +33,28 @@ public class KinoPoiskService {
 
         if (response.getStatusCode() != HttpStatusCode.valueOf(200)) return null;
 
-        return extractKinoPoiskId(response.getBody());
+        try {
+            return extractKinoPoiskId(response.getBody());
+        } catch (KinoPoiskIdNotFoundException e) {
+            throw new KinoPoiskIdNotFoundException(login);
+        }
     }
 
-    private Long extractKinoPoiskId(String responseBody) {
+    private Long extractKinoPoiskId(String responseBody) throws Exception {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(responseBody);
+
+            if (root.isArray() && root.isEmpty()) throw new KinoPoiskIdNotFoundException();
 
             if (root.isArray() && !root.isEmpty()) {
                 return root.get(0).path("id").asLong(0);
             }
             return null;
+        } catch (KinoPoiskIdNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse KinoPoisk ID", e);
+            throw new Exception("Failed to parse KinoPoisk ID", e);
         }
     }
 }

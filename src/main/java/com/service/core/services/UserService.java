@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.management.relation.RoleNotFoundException;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +68,11 @@ public class UserService {
         }
 
         return userRepository.save(user);
+    }
+
+    public boolean isUserOAuthSuccess(UUID userId) throws UserNotFoundException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        return user.getYandexAccount() != null;
     }
 
     private boolean userIsExist(String login, String email) {

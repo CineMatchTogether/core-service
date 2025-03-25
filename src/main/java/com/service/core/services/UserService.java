@@ -3,6 +3,7 @@ package com.service.core.services;
 import com.service.core.models.entities.User;
 import com.service.core.models.entities.YandexAccount;
 import com.service.core.models.entities.enums.ERole;
+import com.service.core.models.entities.enums.EStatusFetching;
 import com.service.core.repositories.RoleRepository;
 import com.service.core.repositories.UserRepository;
 import com.service.core.security.services.exception.UserNotFoundException;
@@ -59,6 +60,7 @@ public class UserService {
                     .login(principal.getAttribute("login"))
                     .email(principal.getAttribute("default_email"))
                     .kinopoiskId(kinoPoiskService.getKinoPoiskId(principal.getAttribute("login")))
+                    .statusFetching(EStatusFetching.NOT_ATTEMPTED)
                     .user(user)
                     .build();
 

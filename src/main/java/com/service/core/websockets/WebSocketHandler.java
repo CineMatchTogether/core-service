@@ -1,6 +1,8 @@
 package com.service.core.websockets;
 
 import com.service.core.security.services.UserDetailsImpl;
+import com.service.core.websockets.repositories.SessionRepository;
+import com.service.core.websockets.services.TextMessageHandler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -13,17 +15,15 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.security.Principal;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Service
 @RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
-    public static final Map<UUID, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final SessionRepository<UUID, WebSocketSession> sessionRepository;
 
-    private final WebSocketService webSocketService;
+    private final TextMessageHandler textMessageHandler;
 
     private final static Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
 
@@ -35,7 +35,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
         UUID userId = userDetailsImpl.getId();
 
-        sessions.put(userId, session);
+        sessionRepository.put(userId, session);
         System.out.println("Новое соединение: " + session.getId() + " " + userId);
         session.sendMessage(new TextMessage("Соединение установлено"));
     }
@@ -45,14 +45,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         System.out.println("Получено сообщение: " + payload);
         System.out.println(session.getPrincipal().getName());
-        UUID userId = ((UserDetailsImpl) ((Authentication) session.getPrincipal()).getPrincipal()).getId();
-        webSocketService.handleTextMessage(userId, message.getPayload());
+        textMessageHandler.handleTextMessage(session, message.getPayload());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         UUID userId = ((UserDetailsImpl) ((Authentication) session.getPrincipal()).getPrincipal()).getId();
-        sessions.remove(userId);
+        sessionRepository.remove(userId);
         logger.info("Connection closed: " + userId + " " + status.toString());
     }
 
@@ -60,7 +59,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         logger.error("Transport error: " + exception.getMessage());
         UUID userId = ((UserDetailsImpl) ((Authentication) session.getPrincipal()).getPrincipal()).getId();
-        sessions.remove(userId);
+        sessionRepository.remove(userId);
     }
 
 }

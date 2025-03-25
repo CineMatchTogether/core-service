@@ -1,5 +1,6 @@
 package com.service.core.models.entities;
 
+import com.service.core.models.entities.enums.EStatusFetching;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,4 +32,8 @@ public class YandexAccount {
 
     @Column(name = "real_name")
     private String realName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_fetching")
+    private EStatusFetching statusFetching;
 }

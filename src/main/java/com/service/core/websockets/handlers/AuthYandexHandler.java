@@ -1,7 +1,6 @@
-package com.service.core.websockets;
+package com.service.core.websockets.handlers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.service.core.security.services.UserDetailsImpl;
 import com.service.core.security.services.exception.UserNotFoundException;
 import com.service.core.services.UserService;
 import com.service.core.websockets.message.MessageStatus;
@@ -10,37 +9,24 @@ import com.service.core.websockets.message.WebSocketMessage;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class WebSocketService {
+public class AuthYandexHandler implements MessageHandler {
 
-    private final ObjectMapper objectMapper;
+    private static final Logger logger = LoggerFactory.getLogger(AuthYandexHandler.class);
     private final UserService userService;
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketService.class);
 
-    public void handleTextMessage(UUID userId, String textMessage) throws JsonProcessingException {
+    @Override
+    public void handle(WebSocketSession session, WebSocketMessage message) {
+        UUID userId = ((UserDetailsImpl) ((Authentication) session.getPrincipal()).getPrincipal()).getId();
 
-        WebSocketMessage request = objectMapper.readValue(textMessage, WebSocketMessage.class);
-
-        switch (request.messageType()) {
-            case AUTH_YANDEX_STATUS:
-                handlerAuthYandexStatus(userId);
-                break;
-            default:
-                logger.info("Unknown request type");
-        }
-
-    }
-
-    private void handlerAuthYandexStatus(UUID userId) {
-        WebSocketSession session = WebSocketHandler.sessions.get(userId);
-        if (session == null || !session.isOpen()) {
+        if (!session.isOpen()) {
             logger.info("Session for user " + userId + " not found or closed");
             return;
         }
@@ -66,14 +52,6 @@ public class WebSocketService {
                     .content(e.getMessage())
                     .build();
             sendMessage(session, response);
-        }
-    }
-
-    private void sendMessage(WebSocketSession session, WebSocketMessage response) {
-        try {
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
-        } catch (Exception e) {
-            logger.error("Error when sending a message: " + e.getMessage());
         }
     }
 }

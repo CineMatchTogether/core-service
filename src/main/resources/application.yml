@@ -19,7 +19,7 @@ spring:
     defer-datasource-initialization: true
   sql:
     init:
-      mode: always
+      mode: embedded
 
 server:
   port: 8080

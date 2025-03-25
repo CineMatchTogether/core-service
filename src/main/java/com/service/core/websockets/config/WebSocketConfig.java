@@ -1,5 +1,6 @@
-package com.service.core.websockets;
+package com.service.core.websockets.config;
 
+import com.service.core.websockets.WebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

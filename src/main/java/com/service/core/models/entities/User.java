@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,4 +44,13 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private YandexAccount yandexAccount;
+
+    @OneToMany(mappedBy = "userMovieHistoryPK.user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UserMovieHistory> movieHistory;
+
+    public List<Long> getMovieIds() {
+        return movieHistory.stream()
+                .map(history -> history.getUserMovieHistoryPK().getMovieId())
+                .toList();
+    }
 }

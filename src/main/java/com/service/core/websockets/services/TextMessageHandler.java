@@ -28,6 +28,9 @@ public class TextMessageHandler {
             case AUTH_YANDEX_STATUS:
                 authYandexHandler.handle(session, request);
                 break;
+            case FETCH_KINOPOISK_HISTORY:
+                fetchKinoPoiskHistoryHandler.handle(session, request);
+                break;
             default:
                 logger.info("Unknown request type");
         }

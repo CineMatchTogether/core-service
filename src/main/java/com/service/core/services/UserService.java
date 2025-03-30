@@ -28,6 +28,10 @@ public class UserService {
 
     private final static Logger logger = LoggerFactory.getLogger(UserService.class);
 
+    public User getOne(UUID userId) throws UserNotFoundException {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
     public User createUser(User user) throws UserAlreadyExistException {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistException("Username is already taken!");

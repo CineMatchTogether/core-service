@@ -8,13 +8,16 @@ import com.service.core.repositories.RoleRepository;
 import com.service.core.repositories.UserRepository;
 import com.service.core.security.services.exception.UserNotFoundException;
 import com.service.core.services.exceptions.UserAlreadyExistException;
+import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.sql.results.internal.TupleImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 
 import javax.management.relation.RoleNotFoundException;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -71,6 +74,7 @@ public class UserService {
             user.setYandexAccount(yandexAccount);
         } catch (Exception e) {
             logger.info(e.getMessage());
+            return userRepository.save(user);
         }
 
         return userRepository.save(user);
@@ -83,5 +87,13 @@ public class UserService {
 
     private boolean userIsExist(String login, String email) {
         return userRepository.existsByUsername(login) || userRepository.existsByEmail(email);
+    }
+
+    public List<Long> getWatchHistoryByUserId(UUID userId) throws UserNotFoundException {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId))
+                .getMovieHistory().stream()
+                .map(h -> h.getUserMovieHistoryPK().getMovieId())
+                .toList();
     }
 }

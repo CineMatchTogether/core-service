@@ -1,4 +1,4 @@
-package com.service.movies.configs;
+package com.service.core.configs;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;

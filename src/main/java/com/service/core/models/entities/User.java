@@ -47,10 +47,4 @@ public class User {
 
     @OneToMany(mappedBy = "userMovieHistoryPK.user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserMovieHistory> movieHistory;
-
-    public List<Long> getMovieIds() {
-        return movieHistory.stream()
-                .map(history -> history.getUserMovieHistoryPK().getMovieId())
-                .toList();
-    }
 }

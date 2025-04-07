@@ -16,7 +16,7 @@ public class KinoPoiskService {
     private final RestTemplate restTemplate;
     private final SettingService settingService;
 
-    public Long getKinoPoiskId(String login) throws Exception {
+    public synchronized Long getKinoPoiskId(String login) throws Exception {
         Setting setting = settingService.getSetting();
         String token = setting.getSearchToken();
         String cookie = setting.getCookie();

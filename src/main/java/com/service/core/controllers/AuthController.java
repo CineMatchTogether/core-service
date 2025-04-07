@@ -13,6 +13,7 @@ import com.service.core.security.services.UserDetailsImpl;
 import com.service.core.security.services.exception.EmptyTokenRefreshException;
 import com.service.core.security.services.exception.TokenRefreshException;
 import com.service.core.services.exceptions.UserAlreadyExistException;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class AuthController {
 
     private final UserMapper userMapper;
 
+    @Operation(summary = "Login user")
     @PostMapping("/login")
     public ResponseEntity<UserDto> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -52,11 +54,13 @@ public class AuthController {
                 .body(userMapper.toDto(userDetails));
     }
 
+    @Operation(summary = "Registration user")
     @PostMapping("/signup")
     public ResponseEntity<UserDto> registerUser(@Valid @RequestBody SignupRequest signUpRequest) throws UserAlreadyExistException {
         return ResponseEntity.ok().body(userMapper.toDto(authService.registerUser(signUpRequest)));
     }
 
+    @Operation(summary = "Logout user")
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser() {
 
@@ -69,6 +73,7 @@ public class AuthController {
                 .body("You've been signed out!");
     }
 
+    @Operation(summary = "Get access token by refresh token")
     @PostMapping("/refreshtoken")
     public ResponseEntity<UserDto> refreshtoken(HttpServletRequest request) throws TokenRefreshException, EmptyTokenRefreshException {
         String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);

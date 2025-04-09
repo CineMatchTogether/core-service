@@ -7,4 +7,6 @@ FROM eclipse-temurin:17-jre-ubi9-minimal
 WORKDIR /app
 COPY --from=builder /app/target/*.jar /app/*.jar
 EXPOSE 8080
+# Копируем CSV-файлы
+COPY data/ /app/data/
 ENTRYPOINT ["java", "-jar", "/app/*.jar"]

@@ -8,11 +8,7 @@ import com.service.core.repositories.RoleRepository;
 import com.service.core.repositories.UserRepository;
 import com.service.core.security.services.exception.UserNotFoundException;
 import com.service.core.services.exceptions.UserAlreadyExistException;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.results.internal.TupleImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +24,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final KinoPoiskService kinoPoiskService;
-
-    private final static Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public User getOne(UUID userId) throws UserNotFoundException {
         return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
@@ -47,7 +41,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User creatOrGetOauthUser(String login, String email, DefaultOAuth2User principal) throws RoleNotFoundException, UserNotFoundException {
+    public synchronized User creatOrGetOauthUser(String login, String email, DefaultOAuth2User principal) throws RoleNotFoundException, UserNotFoundException {
         boolean userExist = userIsExist(login, email);
 
         if (userExist) {
@@ -60,32 +54,30 @@ public class UserService {
                 .roles(Set.of(roleRepository.findByName(ERole.ROLE_USER).orElseThrow(RoleNotFoundException::new)))
                 .build();
 
-        try {
-            YandexAccount yandexAccount = YandexAccount.builder()
-                    .yandexId(Long.valueOf(principal.getAttribute("id")))
-                    .realName(principal.getAttribute("real_name"))
-                    .login(principal.getAttribute("login"))
-                    .email(principal.getAttribute("default_email"))
-                    .kinopoiskId(kinoPoiskService.getKinoPoiskId(principal.getAttribute("login")))
-                    .statusFetching(EStatusFetching.NOT_ATTEMPTED)
-                    .user(user)
-                    .build();
 
-            user.setYandexAccount(yandexAccount);
-        } catch (Exception e) {
-            logger.info(e.getMessage());
-            return userRepository.save(user);
-        }
+        YandexAccount yandexAccount = YandexAccount.builder()
+                .yandexId(Long.valueOf(principal.getAttribute("id")))
+                .realName(principal.getAttribute("real_name"))
+                .login(principal.getAttribute("login"))
+                .email(principal.getAttribute("default_email"))
+                .statusFetching(EStatusFetching.NOT_ATTEMPTED)
+                .user(user)
+                .build();
+
+        user.setYandexAccount(yandexAccount);
 
         return userRepository.save(user);
     }
 
-    public boolean isUserOAuthSuccess(UUID userId) throws UserNotFoundException {
+    public void fetchKinoPoiskId(UUID userId) throws Exception {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        return user.getYandexAccount() != null;
+
+        Long kinoPioskId = kinoPoiskService.getKinoPoiskId(user.getYandexAccount().getLogin());
+        user.getYandexAccount().setKinopoiskId(kinoPioskId);
+        userRepository.save(user);
     }
 
-    private boolean userIsExist(String login, String email) {
+    public boolean userIsExist(String login, String email) {
         return userRepository.existsByUsername(login) || userRepository.existsByEmail(email);
     }
 

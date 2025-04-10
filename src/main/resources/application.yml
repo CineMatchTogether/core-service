@@ -44,4 +44,4 @@ property:
     jwtRefreshCookieName: app-jwt-refresh
     jwtSecret: ${JWT_SECRET:==========secret=phrase=string=example=============}
     jwtExpirationMs: 3600000
-    jwtRefreshExpirationMs: 18000000
+    jwtRefreshExpirationMs: 2592000000

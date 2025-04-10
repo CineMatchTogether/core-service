@@ -3,7 +3,6 @@ package com.service.core.security.services;
 import com.service.core.models.entities.RefreshToken;
 import com.service.core.models.entities.User;
 import com.service.core.security.jwt.JwtUtils;
-import com.service.core.security.services.exception.UserNotFoundException;
 import com.service.core.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,6 +32,7 @@ public class CustomAuthenticationSuccessHandler {
         String username = principal.getAttribute("login");
         String email = principal.getAttribute("email");
 
+        boolean userExist = userService.userIsExist(username, email);
         //find or create user
         User user = userService.creatOrGetOauthUser(username, email, principal);
         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
@@ -49,6 +49,6 @@ public class CustomAuthenticationSuccessHandler {
         request.getSession().invalidate();
 
         //redirect to frontend
-        response.sendRedirect(staticUrl + "oauth-handler");
+        response.sendRedirect(staticUrl + (userExist ? "" : "oauth-handler"));
     }
 }

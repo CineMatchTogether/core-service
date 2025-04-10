@@ -1,7 +1,6 @@
 package com.service.core.websockets.handlers;
 
 import com.service.core.security.services.UserDetailsImpl;
-import com.service.core.security.services.exception.UserNotFoundException;
 import com.service.core.services.UserService;
 import com.service.core.websockets.message.MessageStatus;
 import com.service.core.websockets.message.MessageType;
@@ -17,11 +16,10 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthYandexHandler implements MessageHandler {
+public class FetchKionPoiskIdHandler implements MessageHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthYandexHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(FetchKionPoiskIdHandler.class);
     private final UserService userService;
-
     @Override
     public void handle(WebSocketSession session, WebSocketMessage message) {
         UUID userId = ((UserDetailsImpl) ((Authentication) session.getPrincipal()).getPrincipal()).getId();
@@ -32,22 +30,17 @@ public class AuthYandexHandler implements MessageHandler {
         }
 
         try {
-            boolean success = userService.isUserOAuthSuccess(userId);
-            WebSocketMessage response = success ?
+            userService.fetchKinoPoiskId(userId);
+            WebSocketMessage response =
                     WebSocketMessage.builder()
-                            .messageType(MessageType.AUTH_YANDEX_STATUS)
+                            .messageType(MessageType.FETCH_KINOPOISK_ID)
                             .messageStatus(MessageStatus.SUCCESS)
-                            .content("OAuth authorization success")
-                            .build() :
-                    WebSocketMessage.builder()
-                            .messageType(MessageType.AUTH_YANDEX_STATUS)
-                            .messageStatus(MessageStatus.ERROR)
-                            .content("Error OAuth authorization, please try again")
+                            .content("KinoPoisk id successfully fetched!")
                             .build();
             sendMessage(session, response);
-        } catch (UserNotFoundException e) {
+        } catch (Exception e) {
             WebSocketMessage response = WebSocketMessage.builder()
-                    .messageType(MessageType.AUTH_YANDEX_STATUS)
+                    .messageType(MessageType.FETCH_KINOPOISK_ID)
                     .messageStatus(MessageStatus.ERROR)
                     .content(e.getMessage())
                     .build();

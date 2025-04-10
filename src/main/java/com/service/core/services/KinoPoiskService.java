@@ -16,7 +16,7 @@ public class KinoPoiskService {
     private final RestTemplate restTemplate;
     private final SettingService settingService;
 
-    public synchronized Long getKinoPoiskId(String login) throws Exception {
+    public Long getKinoPoiskId(String login) throws KinoPoiskIdNotFoundException {
         Setting setting = settingService.getSetting();
         String token = setting.getSearchToken();
         String cookie = setting.getCookie();
@@ -35,7 +35,7 @@ public class KinoPoiskService {
 
         try {
             return extractKinoPoiskId(response.getBody());
-        } catch (KinoPoiskIdNotFoundException e) {
+        } catch (Exception e) {
             throw new KinoPoiskIdNotFoundException(login);
         }
     }

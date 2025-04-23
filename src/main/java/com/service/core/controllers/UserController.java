@@ -8,9 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,4 +32,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getWatchHistoryByUserId(userDetails.getId()));
     }
 
+    @Operation(summary = "Add movie to watch history")
+    @PostMapping("/watch-history")
+    public ResponseEntity<Long> addWatchedMovie(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody Long movieId) throws UserNotFoundException {
+        return ResponseEntity.ok(userService.addWatchedMovie(userDetails.getId(), movieId));
+    }
 }

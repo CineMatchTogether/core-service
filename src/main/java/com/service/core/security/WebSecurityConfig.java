@@ -6,7 +6,6 @@ import com.service.core.security.services.CustomAuthenticationSuccessHandler;
 import com.service.core.security.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +38,9 @@ public class WebSecurityConfig {
     @Value("${property.app.yandexClientSecret}")
     private String yandexClientSecret;
 
+    @Value("${property.app.serverUrl}")
+    private String serverUrl;
+
     private static final String[] AUTH_WHITELIST = {
             "/api/auth/**",
             "/v3/api-docs/**",
@@ -46,7 +48,6 @@ public class WebSecurityConfig {
             "/swagger-ui.html"
     };
 
-    private final ServerProperties serverProperties;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
@@ -103,7 +104,7 @@ public class WebSecurityConfig {
                 .clientSecret(yandexClientSecret)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri(getBaseUrl(serverProperties) + "/login/oauth2/code/yandex")
+                .redirectUri(serverUrl + "/login/oauth2/code/yandex")
                 .scope("login:info", "login:email")
                 .authorizationUri("https://oauth.yandex.com/authorize")
                 .tokenUri("https://oauth.yandex.com/token")
@@ -111,16 +112,5 @@ public class WebSecurityConfig {
                 .userNameAttributeName("id")
                 .clientName("Yandex")
                 .build();
-    }
-
-    public String getBaseUrl(ServerProperties serverProperties) {
-        String scheme = serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled() ? "https" : "http";
-        String host = "localhost";
-        int port = serverProperties.getPort() != null ? serverProperties.getPort() : 8080;
-        String contextPath = serverProperties.getServlet().getContextPath() != null
-                ? serverProperties.getServlet().getContextPath()
-                : "";
-
-        return scheme + "://" + host + ":" + port + contextPath;
     }
 }

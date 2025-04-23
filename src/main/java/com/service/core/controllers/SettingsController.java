@@ -6,6 +6,7 @@ import com.service.core.services.SettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,8 @@ public class SettingsController {
 
     @Operation(summary = "Set settings")
     @PostMapping("/set-settings")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SettingDto> setSettings(@RequestBody SettingDto dto) {
-        return ResponseEntity.ok(settingMapper.toDto(settingService.create(settingMapper.toModel(dto))));
+        return ResponseEntity.ok().body(settingMapper.toDto(settingService.create(settingMapper.toModel(dto))));
     }
 }

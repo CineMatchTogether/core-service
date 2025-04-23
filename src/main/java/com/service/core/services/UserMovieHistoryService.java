@@ -16,9 +16,14 @@ import java.util.List;
 public class UserMovieHistoryService {
 
     private final UserMovieHistoryRepository userMovieHistoryRepository;
+
     public void saveAll(User user, List<Long> ids) throws UserNotFoundException {
         userMovieHistoryRepository.saveAll(Arrays.asList(ids.stream()
                 .map(i -> new UserMovieHistory(new UserMovieHistoryPK(user, i)))
                 .toArray(UserMovieHistory[]::new)));
+    }
+
+    public Long save(User user, Long id) {
+        return userMovieHistoryRepository.save(new UserMovieHistory(new UserMovieHistoryPK(user, id))).getUserMovieHistoryPK().getMovieId();
     }
 }

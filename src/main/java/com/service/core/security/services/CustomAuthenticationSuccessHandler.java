@@ -32,7 +32,7 @@ public class CustomAuthenticationSuccessHandler {
         String username = principal.getAttribute("login");
         String email = principal.getAttribute("email");
 
-        boolean userExist = userService.userIsExist(username, email);
+        boolean userExist = userService.userIsExist(username);
         //find or create user
         User user = userService.creatOrGetOauthUser(username, email, principal);
         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
@@ -49,6 +49,6 @@ public class CustomAuthenticationSuccessHandler {
         request.getSession().invalidate();
 
         //redirect to frontend
-        response.sendRedirect(staticUrl + (userExist ? "" : "oauth-handler"));
+        response.sendRedirect(staticUrl + (userExist ? "/#/" : "/#/oauth-handler"));
     }
 }

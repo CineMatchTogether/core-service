@@ -24,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final KinoPoiskService kinoPoiskService;
+    private final UserMovieHistoryService userMovieHistoryService;
 
     public User getOne(UUID userId) throws UserNotFoundException {
         return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
@@ -42,10 +43,10 @@ public class UserService {
     }
 
     public synchronized User creatOrGetOauthUser(String login, String email, DefaultOAuth2User principal) throws RoleNotFoundException, UserNotFoundException {
-        boolean userExist = userIsExist(login, email);
+        boolean userExist = userIsExist(login);
 
         if (userExist) {
-            return userRepository.findUserByUsernameOrEmail(login, email).orElseThrow(() -> new UserNotFoundException(login, email));
+            return userRepository.findByUsername(login).orElseThrow(() -> new UserNotFoundException(login, email));
         }
 
         User user = User.builder()
@@ -77,8 +78,8 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public boolean userIsExist(String login, String email) {
-        return userRepository.existsByUsername(login) || userRepository.existsByEmail(email);
+    public boolean userIsExist(String login) {
+        return userRepository.existsByUsername(login);
     }
 
     public List<Long> getWatchHistoryByUserId(UUID userId) throws UserNotFoundException {
@@ -87,5 +88,10 @@ public class UserService {
                 .getMovieHistory().stream()
                 .map(h -> h.getUserMovieHistoryPK().getMovieId())
                 .toList();
+    }
+
+    public Long addWatchedMovie(UUID id, Long movieId) throws UserNotFoundException {
+        var user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return userMovieHistoryService.save(user, movieId);
     }
 }

@@ -38,6 +38,7 @@ springdoc:
 property:
   app:
     staticUrl: ${STATIC_URL:http://localhost:8080/swagger-ui/index.html}
+    serverUrl: ${SERVER_URL:http://localhost:8080}
     yandexClientId: ${YANDEX_CLIENT_ID}
     yandexClientSecret: ${YANDEX_CLIENT_SECRET}
     jwtCookieName: app-jwt

@@ -21,7 +21,7 @@ public class UserHistoryEventHandler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final FetchKinoPoiskHistoryHandler fetchKinoPoiskHistoryHandler;
 
-    @KafkaHandler
+    @KafkaHandler(isDefault = true)
     public void handle(UserHistoryEvent event, @Header(KafkaHeaders.RECEIVED_KEY) UUID userId) {
         logger.info("Received event with key: {} and message: {}", userId, event.toString());
 

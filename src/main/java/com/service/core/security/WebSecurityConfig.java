@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -32,26 +33,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    @Value("${property.app.yandexClientId}")
-    private String yandexClientId;
-
-    @Value("${property.app.yandexClientSecret}")
-    private String yandexClientSecret;
-
-    @Value("${property.app.serverUrl}")
-    private String serverUrl;
-
     private static final String[] AUTH_WHITELIST = {
             "/api/auth/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
     };
-
     private final CustomAuthenticationSuccessHandler successHandler;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final AuthTokenFilter authTokenFilter;
+    @Value("${property.app.yandexClientId}")
+    private String yandexClientId;
+    @Value("${property.app.yandexClientSecret}")
+    private String yandexClientSecret;
+    @Value("${property.app.serverUrl}")
+    private String serverUrl;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -79,7 +76,9 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(AUTH_WHITELIST).permitAll()
+                        auth
+                                .requestMatchers(AUTH_WHITELIST).permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(config -> config

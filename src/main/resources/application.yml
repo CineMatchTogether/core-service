@@ -8,6 +8,9 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maxLifetime: 1800000
   jpa:
     hibernate:
       ddl-auto: update
@@ -46,3 +49,4 @@ property:
     jwtSecret: ${JWT_SECRET:==========secret=phrase=string=example=============}
     jwtExpirationMs: 3600000
     jwtRefreshExpirationMs: 2592000000
+    recUrl: ${REC_URL:http://localhost:8082}

@@ -42,7 +42,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
     private YandexAccount yandexAccount;
 
     @OneToMany(mappedBy = "userMovieHistoryPK.user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

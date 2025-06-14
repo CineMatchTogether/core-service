@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class YandexAccount {
 
     @Id
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 

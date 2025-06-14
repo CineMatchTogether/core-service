@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class KinoPoiskService {
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate delayedRestTemplate;
     private final SettingService settingService;
 
     public Long getKinoPoiskId(String login) throws KinoPoiskIdNotFoundException {
@@ -29,7 +29,7 @@ public class KinoPoiskService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> response = delayedRestTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
         if (response.getStatusCode() != HttpStatusCode.valueOf(200)) return null;
 

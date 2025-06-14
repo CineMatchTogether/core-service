@@ -8,7 +8,6 @@ import com.service.core.models.entities.enums.ESessionStatus;
 import com.service.core.repositories.SessionRepository;
 import com.service.core.repositories.UserRepository;
 import com.service.core.repositories.UserSessionRepository;
-import com.service.core.security.services.exception.UserNotFoundException;
 import com.service.core.services.exceptions.SessionNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

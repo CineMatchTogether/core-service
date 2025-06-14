@@ -1,6 +1,5 @@
 package com.service.core.controllers;
 
-import com.service.core.models.dto.SessionDto;
 import com.service.core.models.entities.Session;
 import com.service.core.security.services.UserDetailsImpl;
 import com.service.core.security.services.exception.UserNotFoundException;

@@ -1,13 +1,7 @@
 package com.service.core.websockets.handlers;
 
-import com.service.core.models.dto.SessionDto;
-import com.service.core.models.entities.Session;
-import com.service.core.models.entities.UserSession;
-import com.service.core.models.entities.UserSessionPK;
 import com.service.core.models.entities.enums.ESessionStatus;
 import com.service.core.repositories.SessionRepository;
-import com.service.core.repositories.UserRepository;
-import com.service.core.repositories.UserSessionRepository;
 import com.service.core.security.services.UserDetailsImpl;
 import com.service.core.services.SessionService;
 import com.service.core.websockets.message.MessageStatus;
